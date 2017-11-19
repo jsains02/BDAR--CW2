@@ -1,0 +1,430 @@
+---
+title: "BDAR Coursework 2"
+author: "JP Sainsbury"
+date: "4 November 2017"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+JP Sainsbury ID Number - 13139347
+
+## R Markdown
+
+#1
+
+##(a)
+Logistic Regression 
+Using weekly data set produce some numerical and graphical summaries, any patterns?
+
+```{r}
+library(ISLR)
+cor(Weekly[,-9])
+```
+
+Little correlation between this weeks return and the previous weeks return.
+The correlation between Year and Volume are substantial.
+
+```{r}
+plot (Weekly$Volume,xlab = "Index (Time)", ylab = "Volume")
+```
+
+The above graphic shows a strong relationship, as time passes the volume increases exponentially.
+
+##(b)
+Perform logistic regression with Direction
+
+```{r}
+glm.fit=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=Weekly,family = binomial)
+summary(glm.fit)
+```
+The smallest p-value:Lag2, its positive coefficient suggests if the market had a positive return last week its likely to go up this week.
+
+##(c)
+Compute the confusion matrix and overall fraction of correct predictions, what is the confusion matrix telling me about the type of mistakes made by logistic regression.
+
+```{r}
+glm.probs=predict(glm.fit,type="response")
+glm.pred=rep("Down",1089)
+Direction = glm.pred[glm.probs>.5]="Up"
+table(glm.pred,Weekly$Direction)
+
+```
+
+```{r}
+(8+538)/1089
+```
+```{r}
+mean(glm.pred==Weekly$Direction)
+
+```
+
+LR correctly predicted the movement of the market 50.14% of the time
+
+What is the confusion matrix telling me about the types of mistakes made by logistic regression. It incorrectly predicted the False negative 476 times which is more than the False positive 67.
+
+#2 
+LOGISTIC REGRESSION - Develop a model to predict if a car gets high or low milage based on the Auto data set.
+
+##(a)
+
+```{r}
+mpg01 = rep(0,392)
+mpg01[Auto$mpg>median(Auto$mpg)]=1
+table(mpg01)
+d =data.frame(Auto, mpg01)
+```
+
+##(b)
+
+Explore the data graphically to investigate the association between mpg01 and the other features
+
+```{r}
+plot(d$mpg01,d$weight) #Yes useful to predict mpg01
+boxplot(d$weight ~ d$mpg01, main = "Weight vs mpg01")
+##The above shows the heavier the car the more miles per gallon, possibiliy bigger fuel tank
+plot(d$mpg01,d$cylinders) #Not useful
+boxplot(d$cylinders ~ d$mpg01, main = "Cylinders vs mpg01")
+plot(d$mpg01,d$displacement) #Yes useful to predict mpg01
+boxplot(d$displacement ~ d$mpg01, main = "Displacement vs mpg01")
+plot(d$mpg01,d$horsepower) #Yes useful to predict mpg01
+boxplot(d$horsepower ~ d$mpg01, main = "Horsepower vs mpg01")
+plot(d$mpg01,d$acceleration) #Yes useful to predict mpg01
+boxplot(d$acceleration ~ d$mpg01, main = "Acceleration vs mpg01")
+plot(d$mpg01,d$year) #Not useful
+boxplot(d$year ~ d$mpg01, main = "Year vs mpg01")
+plot(d$mpg01,d$origin) #Not useful
+boxplot(d$origin ~ d$mpg01, main = "Origin vs mpg01")
+```
+
+#3
+
+##(a)
+
+Fit a logistic regression model
+
+```{r}
+set.seed(1)
+
+glm.fit=glm(default~income+balance, data = Default, family = binomial)
+
+glm.fit
+
+```
+
+##(b) 
+
+Split the data set
+
+
+
+```{r}
+set.seed(1)
+train = sample(1:nrow(Default), nrow(Default)/2)
+default.validation = Default[-train,]
+
+##(ii)
+
+glm.fit=glm(default~income+balance, data = Default, family = binomial, subset=train)
+
+#(iii)
+glm.probs=predict(glm.fit, default.validation, type="response")
+
+glm.pred=rep("No",5000)
+glm.pred[glm.probs>.5]="Yes"
+
+##(iv)
+
+table(glm.pred, default.validation$default)
+
+mean(glm.pred==default.validation)
+mean(glm.pred!=default.validation)
+
+
+```
+
+58.16% are misclassified.
+
+##(c) 
+
+Repeat with different splits - Repeat 1
+
+```{r}
+set.seed(1)
+train = sample(1:nrow(Default), nrow(Default)/1.5)
+default.validation = Default[-train,]
+
+##(ii)
+
+glm.fit=glm(default~income+balance, data = Default, family = binomial, subset=train)
+
+#(iii)
+glm.probs=predict(glm.fit, default.validation, type="response")
+
+glm.pred=rep("No",3334)
+glm.pred[glm.probs>.5]="Yes"
+
+##(iv)
+
+table(glm.pred, default.validation$default)
+
+mean(glm.pred==default.validation)
+mean(glm.pred!=default.validation)
+```
+
+
+###Repeat 2
+
+```{r}
+set.seed(1)
+train = sample(1:nrow(Default), nrow(Default)/1.01)
+default.validation = Default[-train,]
+
+##(ii)
+
+glm.fit=glm(default~income+balance, data = Default, family = binomial, subset=train)
+
+#(iii)
+glm.probs=predict(glm.fit, default.validation, type="response")
+
+glm.pred=rep("No",100)
+glm.pred[glm.probs>.5]="Yes"
+
+##(iv)
+
+table(glm.pred, default.validation$default)
+
+mean(glm.pred==default.validation)
+mean(glm.pred!=default.validation)
+```
+
+
+###Repeat 3
+
+```{r}
+set.seed(1)
+train = sample(1:nrow(Default), nrow(Default)/4)
+default.validation = Default[-train,]
+
+##(ii)
+
+glm.fit=glm(default~income+balance, data = Default, family = binomial, subset=train)
+
+#(iii)
+glm.probs=predict(glm.fit, default.validation, type="response")
+
+glm.pred=rep("No",7500)
+glm.pred[glm.probs>.5]="Yes"
+
+##(iv)
+
+table(glm.pred, default.validation$default)
+
+mean(glm.pred==default.validation)
+mean(glm.pred!=default.validation)
+```
+
+The result show that the sample size changes do not affect the ability to correctly predict the validation/ test set results. 
+
+
+##(d)
+
+```{r}
+set.seed(1)
+train = sample(1:nrow(Default), nrow(Default)/2)
+default.validation = Default[-train,]
+
+##(ii)
+
+glm.fit=glm(default~income+balance+student, data = Default, family = binomial, subset=train)
+
+#(iii)
+glm.probs=predict(glm.fit, default.validation, type="response")
+
+glm.pred=rep("No",5000)
+glm.pred[glm.probs>.5]="Yes"
+
+##(iv)
+
+table(glm.pred, default.validation$default)
+
+mean(glm.pred==default.validation)
+mean(glm.pred!=default.validation)
+```
+
+Including the dummy variable student does not help reduce the error rate.
+
+#4 
+
+##(a)
+
+LOOCV and Loop
+On the weekly data set fit a logistic regression mode that predicts Direction using Lag1 and Lag2
+
+
+```{r}
+library(ISLR)
+glm.fit=glm(Direction~Lag1+Lag2, data=Weekly, family=binomial)
+summary(glm.fit)
+
+```
+
+On the Weekly data set fit logistic regression model that predicts Direction using Lag1 and Lag2 using all but the first observation.
+
+##(b)
+
+```{r}
+Weekly2 = Weekly[-1,]
+glm.fit=glm(Direction~Lag1+Lag2, data=Weekly2, family=binomial)
+summary(glm.fit)
+```
+
+Predict the direction of the first observation 
+
+##(c)
+
+```{r}
+glm.probs = predict(glm.fit, Weekly[1,], type = "response")
+glm.probs
+Weekly[1,]
+```
+
+Our model predicts the direct as up but the actual direction was down, incorrect classification.
+
+##(d) 
+
+Write a for loop from i = 1 to i = n where n is the number of observations in the data set.
+
+
+```{r}
+n = nrow(Weekly)
+
+count = rep(0,n)
+
+for (i in 1:n) {
+  glm.fit = glm(Direction ~ Lag1 + Lag2, data = Weekly[-i,], family = binomial)
+  prediction = predict.glm(glm.fit, Weekly[i,], type = "response") > 0.5
+  actual = Weekly[i, ]$Direction == "Up"
+  if (prediction != actual)
+    count[i] = 1}
+
+sum(count)
+```
+
+
+##(e)
+
+```{r}
+mean(count)
+```
+The LOOCV estimate for the test error is 45%.
+
+#5
+
+##(a)
+
+```{r}
+set.seed(1)
+x = rnorm(100)
+y=x-2*x^2+rnorm(100)
+```
+
+n is eqaul to 100 and p is eqaul to 2.
+
+##(b) 
+
+Create a scatter plot
+
+```{r}
+plot(y~x)
+```
+
+As x approaches zero y also approaches zero, the plot shows a parabola shap plot open at the bottom
+
+##(c)
+
+Set a random seed, and then compute the LOOCV errors that result from fitting the following four models using least squares.
+
+i.
+
+```{r}
+library(boot)
+set.seed(1)
+randomdata = data.frame(x, y)
+glm.fit=glm(y~x ,data=randomdata)
+cv.err =cv.glm(randomdata ,glm.fit)
+cv.err$delta
+```
+
+
+ii.
+```{r}
+glm.fit=glm(y~poly(x,2), data=randomdata)
+cv.err=cv.glm (randomdata ,glm.fit)
+cv.err$delta
+```
+
+
+iii.
+
+```{r}
+glm.fit=glm(y~poly(x,3), data=randomdata)
+cv.err=cv.glm (randomdata ,glm.fit)
+cv.err$delta
+```
+
+iv.
+```{r}
+glm.fit=glm(y~poly(x,4), data=randomdata)
+cv.err=cv.glm (randomdata ,glm.fit)
+cv.err$delta
+```
+
+##(d)
+
+```{r}
+set.seed(2)
+XY = data.frame(x, y)
+glm.fit=glm(y~x ,data=randomdata)
+cv.err =cv.glm(randomdata ,glm.fit)
+cv.err$delta
+```
+
+```{r}
+glm.fit=glm(y~poly(x,2), data=randomdata)
+cv.err=cv.glm (randomdata ,glm.fit)
+cv.err$delta
+```
+
+```{r}
+glm.fit=glm(y~poly(x,3), data=randomdata)
+cv.err=cv.glm (randomdata ,glm.fit)
+cv.err$delta
+```
+
+```{r}
+glm.fit=glm(y~poly(x,4), data=randomdata)
+cv.err=cv.glm (randomdata ,glm.fit)
+cv.err$delta
+```
+
+My results are the same, I was expecting different two numbers in the delta vector contain the cross-validation results as the data set is different. There is a drop in the estimated test MSE between the linear and quadratic plots, no improvement with using higher-order polynomials.
+
+##(e) 
+
+A model that predicts Y using a quadratic function of X performs better than a model that involves only a linear function of x, and there is little evidence in favor of the model that uses a cubic function of x or quartic.
+
+##(f)
+
+
+```{r}
+summary(glm(y~x ,data=randomdata))
+summary(glm(y~poly(x,2), data=randomdata))
+summary(glm(y~poly(x,3), data=randomdata))
+summary(glm(y~poly(x,4), data=randomdata))
+```
+The coefficient estimates support the cross validation conculsions. 
